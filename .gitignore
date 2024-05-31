@@ -2,5 +2,5 @@
 node_modules/
 *.log
 /.data/
-gl-prettier-codequality.json
+gl-stylelint-codequality.json
 /.eslintcache
