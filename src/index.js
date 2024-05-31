@@ -1,4 +1,5 @@
 import { writeFileSync } from 'node:fs';
+import { exit } from 'node:process';
 import stylelint from 'stylelint';
 import { getOutputPath, convert, getEnv } from './utils.js';
 
@@ -20,5 +21,8 @@ export default function gitlabFormatter(results, returnValue) {
 
   stylelint.formatters[STYLELINT_FORMATTER].then((fallbackFormatter) => {
     console.log(fallbackFormatter(results, returnValue));
+    if (returnValue.errored) {
+      exit(1);
+    }
   });
 }
