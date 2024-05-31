@@ -1,0 +1,27 @@
+eslint:
+  script: yarn test
+  artifacts:
+    reports:
+      codequality: 'gl-codequality.json'
+
+missing-code-quality:
+  script: yarn test
+
+array-code-quality:
+  script: yarn test
+  artifacts:
+    reports:
+      codequality: []
+
+non-string-code-quality:
+  script: yarn test
+  artifacts:
+    reports:
+      codequality: 3
+
+glob-code-quality:
+  script: yarn test
+  artifacts:
+    reports:
+      codequality: '*.json'
+

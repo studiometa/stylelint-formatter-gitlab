@@ -1,0 +1,6 @@
+*.sublime-*
+node_modules/
+*.log
+/.data/
+gl-prettier-codequality.json
+/.eslintcache
