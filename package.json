@@ -1,6 +1,6 @@
 {
   "name": "@studiometa/stylelint-formatter-gitlab",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A StyleLint formatter for the GitLab Code Quality report",
   "main": "src/index.js",
   "type": "module",
