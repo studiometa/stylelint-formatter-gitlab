@@ -1,4 +1,4 @@
-# StyleLint formatter for GitLab Code Quality
+# @studiometa/stylelint-formatter-gitlab
 
 [![NPM Version](https://img.shields.io/npm/v/@studiometa/stylelint-formatter-gitlab.svg?style=flat&colorB=3e63dd&colorA=414853)](https://www.npmjs.com/package/@studiometa/stylelint-formatter-gitlab/)
 [![Downloads](https://img.shields.io/npm/dm/@studiometa/stylelint-formatter-gitlab?style=flat&colorB=3e63dd&colorA=414853)](https://www.npmjs.com/package/@studiometa/stylelint-formatter-gitlab/)
