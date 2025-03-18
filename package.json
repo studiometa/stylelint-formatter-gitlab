@@ -35,7 +35,7 @@
   },
   "homepage": "https://github.com/studiometa/stylelint-formatter-gitlab#readme",
   "devDependencies": {
-    "@studiometa/eslint-config": "4.0.1",
+    "@studiometa/eslint-config": "4.2.0",
     "@studiometa/prettier-config": "4.1.0",
     "@studiometa/stylelint-config": "4.0.0",
     "bun": "1.1.43",
