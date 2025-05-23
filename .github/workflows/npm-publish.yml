@@ -17,27 +17,23 @@ jobs:
           registry-url: https://registry.npmjs.org/
 
       - run: |
-          VERSION=${GITHUB_REF/refs\/tags\//}
-          TAG='latest'
-          if [[ $VERSION =~ 'alpha' || $VERSION =~ 'beta' || $VERSION =~ 'rc' ]]; then
-            TAG='next'
-          fi
-          npm publish --tag $TAG
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+          NPM_TAG='latest'
+          IS_PRERELEASE=false
 
-      # @see https://github.com/actions/create-release/issues/38#issuecomment-715327220
-      # @see https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-commands-for-github-actions#environment-files
-      - name: Prepare the changelog from the tag message
-        id: prepare_changelog
-        run: |
-          PRERELEASE=false
-          # Check release type
           if [[ $GITHUB_REF_NAME =~ 'alpha' || $GITHUB_REF_NAME =~ 'beta' || $GITHUB_REF_NAME =~ 'rc' ]]; then
-            echo "This is a prerelease."
-            PRERELEASE=true
+            NPM_TAG='next'
+            IS_PRERELEASE=true
           fi
-          echo "is_prerelease=$PRERELEASE" >> $GITHUB_ENV
+
+          echo "NPM_TAG=$NPM_TAG" >> $GITHUB_ENV
+          echo "IS_PRERELEASE=$IS_PRERELEASE" >> $GITHUB_ENV
+
+      - uses: JS-DevTools/npm-publish@v3
+        with:
+          provenance: true
+          package: dist/
+          tag: ${{ env.NPM_TAG }}
+          token: ${{ secrets.NPM_TOKEN }}
 
       # @see https://github.com/actions/create-release
       - name: Create Release
