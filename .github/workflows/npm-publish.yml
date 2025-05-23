@@ -31,7 +31,7 @@ jobs:
       - uses: JS-DevTools/npm-publish@v3
         with:
           provenance: true
-          package: dist/
+          package: .
           tag: ${{ env.NPM_TAG }}
           token: ${{ secrets.NPM_TOKEN }}
 
