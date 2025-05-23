@@ -1,6 +1,9 @@
-# StyleLint formatter for GitLab Code Quality
+# @studiometa/stylelint-formatter-gitlab
 
-[![NPM Version](https://img.shields.io/npm/v/@studiometa/stylelint-formatter-gitlab.svg?style=flat-square)](https://www.npmjs.com/package/@studiometa/stylelint-formatter-gitlab/)
+[![NPM Version](https://img.shields.io/npm/v/@studiometa/stylelint-formatter-gitlab.svg?style=flat&colorB=3e63dd&colorA=414853)](https://www.npmjs.com/package/@studiometa/stylelint-formatter-gitlab/)
+[![Downloads](https://img.shields.io/npm/dm/@studiometa/stylelint-formatter-gitlab?style=flat&colorB=3e63dd&colorA=414853)](https://www.npmjs.com/package/@studiometa/stylelint-formatter-gitlab/)
+[![Size](https://img.shields.io/bundlephobia/minzip/@studiometa/stylelint-formatter-gitlab?style=flat&colorB=3e63dd&colorA=414853&label=size)](https://bundlephobia.com/package/@studiometa/stylelint-formatter-gitlab)
+[![Dependency Status](https://img.shields.io/librariesio/release/npm/@studiometa/stylelint-formatter-gitlab?style=flat&colorB=3e63dd&colorA=414853)](https://david-dm.org/studiometa/stylelint-formatter-gitlab)
 
 > Format StyleLint errors for Gitlab Code Quality reports.
 
