@@ -21,7 +21,7 @@ describe('getOutputPath', () => {
   it('should throw an error if the codequality output is an array', () => {
     process.env.CI_JOB_NAME = 'array-code-quality';
     expect(getOutputPath).toThrow(
-      'Expected array-code-quality.artifacts.reports.codequality to be one exact path, but found an array instead.',
+      'Expected array-code-quality.artifacts.reports.codequality to be one exact path, but found [] instead.',
     );
   });
 
@@ -35,7 +35,7 @@ describe('getOutputPath', () => {
   it('should throw an error if the codequality output is a glob', () => {
     process.env.CI_JOB_NAME = 'glob-code-quality';
     expect(getOutputPath).toThrow(
-      'Expected glob-code-quality.artifacts.reports.codequality to be one exact path, but found a glob instead.',
+      'Expected glob-code-quality.artifacts.reports.codequality to be one exact path, but found a glob-like string instead.',
     );
   });
 });
