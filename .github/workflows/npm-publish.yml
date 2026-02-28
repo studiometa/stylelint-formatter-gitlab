@@ -62,8 +62,6 @@ jobs:
 
       - name: Publish
         run: npm publish --provenance --access public --tag ${{ env.NPM_TAG }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
