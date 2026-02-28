@@ -1,8 +1,17 @@
 import { createHash } from 'node:crypto';
 import { join, resolve, relative } from 'node:path';
 import { readFileSync } from 'node:fs';
-import isGlob from 'is-glob';
-import yaml from 'js-yaml';
+import { parseDocument } from 'yaml';
+
+/** @type {import('yaml').CollectionTag} */
+const referenceTag = {
+  tag: '!reference',
+  collection: 'seq',
+  default: false,
+  resolve() {
+    // We only allow the syntax. We don’t actually resolve the reference.
+  },
+};
 
 /**
  * Get environment variables with sane defaults.
@@ -33,22 +42,28 @@ export function getEnv() {
  */
 export function getOutputPath() {
   const { CI_PROJECT_DIR, CI_CONFIG_PATH, CI_JOB_NAME } = getEnv();
-  const jobs = yaml.load(readFileSync(join(CI_PROJECT_DIR, CI_CONFIG_PATH), 'utf-8'));
-  const { artifacts } = jobs[CI_JOB_NAME];
-  const location = artifacts && artifacts.reports && artifacts.reports.codequality;
+  const doc = parseDocument(readFileSync(join(CI_PROJECT_DIR, CI_CONFIG_PATH), 'utf-8'), {
+    version: '1.1',
+    customTags: [referenceTag],
+  });
+
+  const path = [CI_JOB_NAME, 'artifacts', 'reports', 'codequality'];
+  const location = doc.getIn(path);
+
   const msg = `Expected ${CI_JOB_NAME}.artifacts.reports.codequality to be one exact path`;
+
   if (location === null || location === undefined) {
     throw new Error(`${msg}, but no value was found.`);
   }
-  if (Array.isArray(location)) {
-    throw new Error(`${msg}, but found an array instead.`);
-  }
+
   if (typeof location !== 'string') {
     throw new Error(`${msg}, but found ${JSON.stringify(location)} instead.`);
   }
-  if (isGlob(location)) {
-    throw new Error(`${msg}, but found a glob instead.`);
+
+  if (location.includes('*')) {
+    throw new Error(`${msg}, but found a glob-like string instead.`);
   }
+
   return resolve(CI_PROJECT_DIR, location);
 }
 

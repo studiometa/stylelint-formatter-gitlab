@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## v1.1.0 - 2026-02-28
+
+### Added
+
+- Add support for Stylelint v17 ([649ae1b](https://github.com/studiometa/stylelint-formatter-gitlab/commit/649ae1b), [#69](https://github.com/studiometa/stylelint-formatter-gitlab/pull/69))
+
 ## v1.0.2 - 2025-05-23
 
 ### Fixed
