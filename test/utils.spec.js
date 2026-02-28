@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test';
 import path from 'node:path';
-import { getOutputPath, convert, createFingerprint } from '../src/utils.js';
+import { getOutputPath, convert, createFingerprint, mapSeverity } from '../src/utils.js';
 
 process.env.CI_PROJECT_DIR = import.meta.dirname;
 process.env.CI_CONFIG_PATH = '__fixtures__/.gitlab-ci.yml';
@@ -69,6 +69,22 @@ describe('createFingerprint', () => {
     });
 
     expect(result).toBe(anotherResult);
+  });
+});
+
+describe('mapSeverity', () => {
+  it('should map "error" to "major"', () => {
+    expect(mapSeverity('error')).toBe('major');
+  });
+
+  it('should map "warning" to "minor"', () => {
+    expect(mapSeverity('warning')).toBe('minor');
+  });
+
+  it('should map unknown severities to "minor"', () => {
+    expect(mapSeverity('info')).toBe('minor');
+    expect(mapSeverity('unknown')).toBe('minor');
+    expect(mapSeverity('')).toBe('minor');
   });
 });
 

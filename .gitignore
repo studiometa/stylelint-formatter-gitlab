@@ -4,3 +4,4 @@ node_modules/
 /.data/
 gl-stylelint-codequality.json
 /.eslintcache
+coverage/
