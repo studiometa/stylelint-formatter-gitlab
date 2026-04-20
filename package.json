@@ -42,8 +42,8 @@
     "stylelint": "17.4.0"
   },
   "dependencies": {
-    "jest-diff": "30.2.0",
-    "yaml": "2.8.2"
+    "jest-diff": "^30.2.0",
+    "yaml": "^2.8.2"
   },
   "peerDependencies": {
     "stylelint": "^16.0 || ^17.0"
