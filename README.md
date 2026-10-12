@@ -63,6 +63,18 @@ Maintainers release with the `Release` workflow, which bumps the version, folds 
 gh workflow run publish.yml -f bump=patch # or minor / major
 ```
 
+The `prepatch`, `preminor`, `premajor` and `prerelease` bumps create a prerelease, with the `preid` input as identifier (`alpha` by default, or `beta` / `rc`). A prerelease goes to the `next` dist-tag on npm and is a prerelease on GitHub. Any other version goes to the `latest` dist-tag:
+
+```bash
+gh workflow run publish.yml -f bump=preminor -f preid=beta # 1.2.0-beta.0
+gh workflow run publish.yml -f bump=prerelease -f preid=beta # 1.2.0-beta.1
+gh workflow run publish.yml -f bump=patch # 1.2.0, stable release of the prerelease
+```
+
+The stable release of a prerelease can have no new fragment: its GitHub release then says `Stable release of <prerelease version>.`
+
+The workflow publishes with npm trusted publishing: it needs no npm token. If the publish job fails, use "Re-run failed jobs": npm skips a version that it already has, and the GitHub release is updated when it exists.
+
 ## Notes
 
 This project is based on the [`stylelint-formatter-gitlab`](https://gitlab.com/leon0399/stylelint-formatter-gitlab) package which seems unmaintained and does not support StyleLint v16.

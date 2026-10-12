@@ -6,10 +6,15 @@ on:
   workflow_dispatch:
     inputs:
       bump:
-        description: 'Version bump'
+        description: 'Version bump (the pre* bumps create a prerelease)'
         type: choice
-        options: [patch, minor, major]
+        options: [patch, minor, major, prepatch, preminor, premajor, prerelease]
         default: patch
+      preid:
+        description: 'Prerelease identifier, used by the pre* bumps only'
+        type: choice
+        options: [alpha, beta, rc]
+        default: alpha
 
 concurrency: release
 
@@ -47,6 +52,9 @@ jobs:
       pull-requests: read
     outputs:
       version: ${{ steps.version.outputs.version }}
+      previous: ${{ steps.version.outputs.previous }}
+      prerelease: ${{ steps.dist-tag.outputs.prerelease }}
+      dist-tag: ${{ steps.dist-tag.outputs.dist-tag }}
       body: ${{ steps.changelog.outputs.body }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
@@ -58,9 +66,26 @@ jobs:
         id: version
         env:
           BUMP: ${{ inputs.bump }}
+          PREID: ${{ inputs.preid }}
         run: |
-          npm version "$BUMP" --no-git-tag-version
+          echo "previous=$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
+          npm version "$BUMP" --preid "$PREID" --no-git-tag-version
           echo "version=$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
+
+      # A prerelease version (with a `-`, e.g. 1.2.0-beta.0) goes to the `next`
+      # dist-tag on npm, any other version to `latest`.
+      - name: Resolve npm dist-tag
+        id: dist-tag
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if [[ $VERSION == *-* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+            echo "dist-tag=next" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+            echo "dist-tag=latest" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Fold changelog fragments
         id: changelog
@@ -69,9 +94,18 @@ jobs:
           command: release
           version: v${{ steps.version.outputs.version }}
 
+      # Promoting a prerelease (1.0.0-rc.1 to 1.0.0) can have no new fragment:
+      # the prerelease already folded them. The GitHub release then says so.
       - name: Fail when there is nothing to release
         if: steps.changelog.outputs.changed != 'true'
+        env:
+          PREVIOUS: ${{ steps.version.outputs.previous }}
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
+          if [[ $PREVIOUS == *-* && $VERSION != *-* ]]; then
+            echo "::notice::No fragment in .changelog/: stable release of $PREVIOUS."
+            exit 0
+          fi
           echo "::error::No fragment in .changelog/: nothing to release."
           exit 1
 
@@ -87,7 +121,9 @@ jobs:
           git push origin HEAD:main "$VERSION"
 
   # A tag pushed with GITHUB_TOKEN does not start other workflows, so the
-  # release publishes in the same run.
+  # release publishes in the same run. Every step can run again: npm skips a
+  # version it already has, and the GitHub release is updated when it exists.
+  # "Re-run failed jobs" on this job publishes what a failed run left.
   publish:
     name: Publish to npm
     needs: release
@@ -95,27 +131,56 @@ jobs:
     permissions:
       contents: write
       id-token: write
+    env:
+      VERSION: ${{ needs.release.outputs.version }}
+      PREVIOUS: ${{ needs.release.outputs.previous }}
+      PRERELEASE: ${{ needs.release.outputs.prerelease }}
+      DIST_TAG: ${{ needs.release.outputs.dist-tag }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
-          ref: ${{ needs.release.outputs.version }}
+          ref: refs/tags/${{ needs.release.outputs.version }}
 
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '24'
           cache: 'npm'
-          registry-url: https://registry.npmjs.org/
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Publish
-        run: npm publish --provenance --access public
+      # Trusted publishing (OIDC): no npm token. The package has no lifecycle
+      # script and publishes its sources as they are, so --ignore-scripts (the
+      # action default) changes nothing.
+      - name: Publish @studiometa/stylelint-formatter-gitlab
+        uses: JS-DevTools/npm-publish@0fd2f4369c5d6bcfcde6091a7c527d810b9b5c3f # v4.1.5
+        with:
+          package: .
+          access: public
+          provenance: true
+          tag: ${{ env.DIST_TAG }}
+
+      # The release body is the version's section of CHANGELOG.md. A stable
+      # release of a prerelease without new fragments has no section: its body
+      # names the prerelease.
+      - name: Write release notes
+        env:
+          BODY: ${{ needs.release.outputs.body }}
+        run: |
+          if [ -n "$BODY" ]; then
+            printf '%s\n' "$BODY" > "$RUNNER_TEMP/release-notes.md"
+          else
+            echo "Stable release of $PREVIOUS." > "$RUNNER_TEMP/release-notes.md"
+          fi
 
       - name: Create GitHub Release
         uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
         with:
-          tag: ${{ needs.release.outputs.version }}
-          name: v${{ needs.release.outputs.version }}
-          body: ${{ needs.release.outputs.body }}
+          tag: ${{ env.VERSION }}
+          name: v${{ env.VERSION }}
+          bodyFile: ${{ runner.temp }}/release-notes.md
+          prerelease: ${{ env.PRERELEASE }}
+          # GitHub's latest release follows the `latest` dist-tag on npm.
+          makeLatest: ${{ env.PRERELEASE != 'true' }}
+          allowUpdates: true
