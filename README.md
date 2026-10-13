@@ -57,23 +57,15 @@ Do not edit `CHANGELOG.md`. Each pull request adds a fragment in `.changelog/<sl
 
 Do not write the pull request number: the release adds it. A pull request that changes `src/` needs a fragment, unless it has the `no-changelog` label (tests, refactors, tooling). See [`weareikko/changelog`](https://github.com/weareikko/changelog) for the format.
 
-Maintainers release with the `Release` workflow, which bumps the version, folds the fragments into `CHANGELOG.md`, commits, tags, publishes to npm and creates the GitHub release:
+Each merge into `main` releases what its fragments describe. The `Release` workflow (`publish.yml`) runs the checks, gets the next version from the fragments (an `Added` entry gives a minor version, other entries a patch version, a `Breaking:` entry a major version), folds the fragments into `CHANGELOG.md`, bumps `package.json`, commits `Release <version>`, tags, creates the GitHub release and publishes to npm. A merge without fragments releases nothing. A manual run forces a bump:
 
 ```bash
-gh workflow run publish.yml -f bump=patch # or minor / major
+gh workflow run publish.yml -f version=major # or minor / patch
 ```
 
-The `prepatch`, `preminor`, `premajor` and `prerelease` bumps create a prerelease, with the `preid` input as identifier (`alpha` by default, or `beta` / `rc`). A prerelease goes to the `next` dist-tag on npm and is a prerelease on GitHub. Any other version goes to the `latest` dist-tag:
+To release prereleases, add a `.changelog/prerelease` file with one identifier (`alpha`, `beta` or `rc`): each merge with fragments then releases the next prerelease (`1.2.0-rc.0`, `1.2.0-rc.1`), on the `next` dist-tag on npm and as a prerelease on GitHub. The pull request that deletes the file releases the stable version. See [Prereleases](https://github.com/weareikko/changelog#prereleases).
 
-```bash
-gh workflow run publish.yml -f bump=preminor -f preid=beta # 1.2.0-beta.0
-gh workflow run publish.yml -f bump=prerelease -f preid=beta # 1.2.0-beta.1
-gh workflow run publish.yml -f bump=patch # 1.2.0, stable release of the prerelease
-```
-
-The stable release of a prerelease can have no new fragment: its GitHub release then says `Stable release of <prerelease version>.`
-
-The workflow publishes with npm trusted publishing: it needs no npm token. If the publish job fails, use "Re-run failed jobs": npm skips a version that it already has, and the GitHub release is updated when it exists.
+The workflow publishes with npm trusted publishing: it needs no npm token. If the publish job fails, use "Re-run failed jobs": npm skips a version that it already has.
 
 ## Notes
 
