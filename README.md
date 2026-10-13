@@ -57,11 +57,15 @@ Do not edit `CHANGELOG.md`. Each pull request adds a fragment in `.changelog/<sl
 
 Do not write the pull request number: the release adds it. A pull request that changes `src/` needs a fragment, unless it has the `no-changelog` label (tests, refactors, tooling). See [`weareikko/changelog`](https://github.com/weareikko/changelog) for the format.
 
-Maintainers release with the `Release` workflow, which bumps the version, folds the fragments into `CHANGELOG.md`, commits, tags, publishes to npm and creates the GitHub release:
+Each merge into `main` releases what its fragments describe. The `Release` workflow (`publish.yml`) runs the checks, gets the next version from the fragments (an `Added` entry gives a minor version, other entries a patch version, a `Breaking:` entry a major version), folds the fragments into `CHANGELOG.md`, bumps `package.json`, commits `Release <version>`, tags, creates the GitHub release and publishes to npm. A merge without fragments releases nothing. A manual run forces a bump:
 
 ```bash
-gh workflow run publish.yml -f bump=patch # or minor / major
+gh workflow run publish.yml -f version=major # or minor / patch
 ```
+
+To release prereleases, add a `.changelog/prerelease` file with one identifier (`alpha`, `beta` or `rc`): each merge with fragments then releases the next prerelease (`1.2.0-rc.0`, `1.2.0-rc.1`), on the `next` dist-tag on npm and as a prerelease on GitHub. The pull request that deletes the file releases the stable version. See [Prereleases](https://github.com/weareikko/changelog#prereleases).
+
+The workflow publishes with npm trusted publishing: it needs no npm token. If the publish job fails, use "Re-run failed jobs": npm skips a version that it already has.
 
 ## Notes
 
