@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. Each pull r
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.1.2 - 2026-10-13
+
+### Changed
+
+- Replace the `## [Unreleased]` section with `.changelog/` fragments checked on pull requests by `weareikko/changelog`, and release from the `Release` workflow, which bumps the version, folds the fragments into `CHANGELOG.md`, tags and publishes ([#73])
+
+[#73]: https://github.com/studiometa/stylelint-formatter-gitlab/pull/73
+
 ## v1.1.1 - 2026-04-20
 
 ### Changed
