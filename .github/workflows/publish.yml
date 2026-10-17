@@ -63,7 +63,7 @@ jobs:
 
       - name: Release
         id: release
-        uses: weareikko/changelog@9d93346df9858eaa29007bd8530aad8f4c5b539a # 0.1.0
+        uses: weareikko/changelog@0b4e3b5d6e33dc7f1379f2e822afbc7d5669c9b5 # 0.1.1
         with:
           command: release
           version: ${{ inputs.version || 'auto' }}
